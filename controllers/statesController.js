@@ -4,54 +4,6 @@ const router = express.Router();
 const fs = require("fs");
 const path = require("path");
 
-// router.get("/states", async (req, res) => {
-//   const isContig = req.query.contig;
-//   const funfacts = await State.find();
-
-//   const transformedStates = funfacts.map((state) => ({
-//     stateCode: state.stateCode,
-//     funfacts:
-//       state.funfacts.size === 0 ? [] : Array.from(state.funfacts.values()),
-//   }));
-
-//   fs.readFile(
-//     path.join(__dirname, "../model/statesData.json"),
-//     "utf8",
-//     (err, data) => {
-//       if (err) {
-//         console.error("Error reading file:", err);
-//         return res.status(500).json({ message: "Failed to load state data" });
-//       }
-
-//       let states = JSON.parse(data);
-
-//       states.forEach((state) => {
-//         let match = transformedStates.find(
-//           (transformedState) => transformedState.stateCode === state.code
-//         );
-//         if (match) {
-//           state.funfacts = match.funfacts;
-//         }
-//       });
-
-//       const nonContiguousStates = ["AK", "HI"];
-
-//       if (isContig === "false") {
-//         const resultStates = states.filter((state) =>
-//           nonContiguousStates.includes(state.code)
-//         );
-//         res.json(resultStates);
-//       } else if (isContig === "true") {
-//         const resultStates = states.filter(
-//           (state) => !nonContiguousStates.includes(state.code)
-//         );
-//         res.json(resultStates);
-//       } else {
-//         res.json(states);
-//       }
-//     }
-//   );
-// });
 
 router.get("/states", async (req, res) => {
   const isContig = req.query.contig;
@@ -108,11 +60,6 @@ router.get("/states/:code", async (req, res) => {
   const stateCode = req.params.code.toUpperCase();
 
   const funfacts = await State.find();
-
-  // const transformedStates = funfacts.map((state) => ({
-  //   stateCode: state.stateCode,
-  //   funfacts: (state.funfacts && state.funfacts.size !== 0) ? Array.from(state.funfacts.values()) : []
-  // }));
 
   const transformedStates = funfacts.map((state) => {
     let transformedState = { stateCode: state.stateCode };
@@ -524,17 +471,14 @@ router.delete("/states/:state/funfact", async (req, res) => {
           });
         }
 
-        funfactsArray.splice(index - 1, 1); // Adjust index because arrays are 0-based
+        funfactsArray.splice(index - 1, 1); 
 
-        // Clear the existing Map
         stateFromDB.funfacts.clear();
 
-        // Rebuild the Map without the deleted fun fact
         funfactsArray.forEach((fact, idx) => {
           stateFromDB.funfacts.set(String(idx), fact);
         });
 
-        // Save the modified document
         const updatedState = await stateFromDB.save();
 
         const funfact = Array.from(stateFromDB.funfacts.values());
